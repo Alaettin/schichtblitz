@@ -5,7 +5,6 @@ import { Download } from "lucide-react"
 import type { ShiftTemplate, AssignmentWithDetails } from "@/types"
 import {
   DAYS_ORDERED,
-  DAY_OF_WEEK_SHORT,
   DAY_OF_WEEK_LABELS,
   QUALIFICATION_LABELS,
   getStaffingForDay,

@@ -16,7 +16,7 @@ import {
   getStaffingForDay,
   totalStaffing,
 } from "@/types"
-import type { ShiftTemplate, StaffingMap, AssignmentWithDetails, EmployeeWithAvailability, AbsenceWithEmployee } from "@/types"
+import type { ShiftTemplate, AssignmentWithDetails, EmployeeWithAvailability, AbsenceWithEmployee } from "@/types"
 import { Trash2, UserPlus } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { EmployeePickerSheet } from "./employee-picker-sheet"
@@ -43,6 +43,7 @@ export function CellDetailSheet({
   assignments,
   employees,
   absences,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   locationId,
   onMutate,
 }: CellDetailSheetProps) {

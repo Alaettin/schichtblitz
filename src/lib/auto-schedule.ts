@@ -172,9 +172,6 @@ export async function autoSchedule(
       const prefScore = avail?.status === "PREFERRED" ? 2 : 1
       const state = empState.get(emp.id)!
 
-      // Compute utilization ratio: lower = more spare capacity
-      const utilization = 1 - (state.remainingHours / emp.weeklyHours)
-
       candidates.push({
         employeeId: emp.id,
         score: prefScore,
