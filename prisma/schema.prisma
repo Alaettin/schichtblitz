@@ -1,0 +1,142 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Organization {
+  id        String     @id @default(cuid())
+  name      String
+  locations Location[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model Location {
+  id             String          @id @default(cuid())
+  name           String
+  address        String?
+  organizationId String
+  organization   Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  employees      Employee[]
+  shiftTemplates ShiftTemplate[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+}
+
+enum ContractType {
+  FULLTIME
+  PARTTIME
+  MINIJOB
+}
+
+enum Qualification {
+  KITCHEN
+  SERVICE
+  BAR
+}
+
+model Employee {
+  id             String          @id @default(cuid())
+  firstName      String
+  lastName       String
+  email          String?
+  phone          String?
+  contractType   ContractType
+  weeklyHours    Float
+  hourlyRate     Float?
+  qualifications Qualification[]
+  startDate      DateTime
+  isActive       Boolean         @default(true)
+  locationId     String
+  location       Location        @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  availabilities Availability[]
+  assignments    ShiftAssignment[]
+  absences       Absence[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+}
+
+enum DayOfWeek {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
+enum AvailabilityStatus {
+  AVAILABLE
+  UNAVAILABLE
+  PREFERRED
+}
+
+model Availability {
+  id         String             @id @default(cuid())
+  employeeId String
+  employee   Employee           @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  dayOfWeek  DayOfWeek
+  status     AvailabilityStatus
+  startTime  String?
+  endTime    String?
+  createdAt  DateTime           @default(now())
+  updatedAt  DateTime           @updatedAt
+
+  @@unique([employeeId, dayOfWeek])
+}
+
+enum AbsenceType {
+  URLAUB
+  KRANKHEIT
+  FREIWUNSCH
+  SONSTIGES
+}
+
+model Absence {
+  id         String      @id @default(cuid())
+  employeeId String
+  employee   Employee    @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  type       AbsenceType
+  startDate  DateTime
+  endDate    DateTime
+  note       String?
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  @@index([employeeId, startDate, endDate])
+}
+
+model ShiftTemplate {
+  id          String            @id @default(cuid())
+  name        String
+  startTime   String
+  endTime     String
+  staffing    Json              @default("{}")
+  isActive    Boolean           @default(true)
+  locationId  String
+  location    Location          @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  assignments ShiftAssignment[]
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+}
+
+model ShiftAssignment {
+  id              String        @id @default(cuid())
+  shiftTemplateId String
+  shiftTemplate   ShiftTemplate @relation(fields: [shiftTemplateId], references: [id], onDelete: Cascade)
+  employeeId      String
+  employee        Employee      @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  dayOfWeek       DayOfWeek
+  weekStart       DateTime
+  qualification   Qualification
+  createdAt       DateTime      @default(now())
+
+  @@unique([shiftTemplateId, employeeId, dayOfWeek, weekStart])
+  @@index([weekStart, shiftTemplateId])
+  @@index([employeeId, weekStart])
+}
