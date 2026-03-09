@@ -32,12 +32,15 @@ RUN adduser --system --uid 1001 nextjs
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 
-# Copy Prisma files for migrations
-COPY --from=builder /app/prisma ./prisma
+# Copy Prisma (client + CLI + migrations)
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
-COPY --from=builder /app/node_modules/.bin/prisma ./node_modules/.bin/prisma
+COPY --from=builder /app/prisma ./prisma
+
+# Entrypoint: run migrations then start server
+COPY --from=builder /app/node_modules/prisma/build /app/node_modules/prisma/build
+RUN printf '#!/bin/sh\nnode node_modules/prisma/build/index.js migrate deploy\nexec node server.js\n' > /app/start.sh && chmod +x /app/start.sh
 
 USER nextjs
 
@@ -45,4 +48,4 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-CMD ["node", "server.js"]
+CMD ["/app/start.sh"]
