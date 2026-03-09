@@ -25,6 +25,9 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
+# OpenSSL for Prisma
+RUN apk add --no-cache openssl
+
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
@@ -38,8 +41,10 @@ COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
 COPY --from=builder /app/prisma ./prisma
 
+# Make prisma engines writable for nextjs user
+RUN chown -R nextjs:nodejs /app/node_modules/@prisma /app/node_modules/prisma
+
 # Entrypoint: run migrations then start server
-COPY --from=builder /app/node_modules/prisma/build /app/node_modules/prisma/build
 RUN printf '#!/bin/sh\nnode node_modules/prisma/build/index.js migrate deploy\nexec node server.js\n' > /app/start.sh && chmod +x /app/start.sh
 
 USER nextjs
