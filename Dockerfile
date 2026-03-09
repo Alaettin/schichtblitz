@@ -45,7 +45,7 @@ COPY --from=builder /app/prisma ./prisma
 RUN chown -R nextjs:nodejs /app/node_modules/@prisma /app/node_modules/prisma
 
 # Entrypoint: run migrations then start server
-RUN printf '#!/bin/sh\nnode node_modules/prisma/build/index.js migrate deploy\nexec node server.js\n' > /app/start.sh && chmod +x /app/start.sh
+RUN printf '#!/bin/sh\nnode node_modules/prisma/build/index.js migrate deploy\nnode prisma/seed.js\nexec node server.js\n' > /app/start.sh && chmod +x /app/start.sh
 
 USER nextjs
 
