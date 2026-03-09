@@ -1,0 +1,39 @@
+services:
+  app:
+    build: .
+    container_name: schichtblitz_app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://schichtblitz:${DB_PASSWORD}@db:5432/schichtblitz
+    networks:
+      - internal
+      - caddy
+
+  db:
+    image: postgres:16-alpine
+    container_name: schichtblitz_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: schichtblitz
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: schichtblitz
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U schichtblitz"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:
+
+networks:
+  internal:
+  caddy:
+    external: true
