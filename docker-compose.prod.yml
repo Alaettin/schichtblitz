@@ -8,9 +8,10 @@ services:
         condition: service_healthy
     environment:
       DATABASE_URL: postgresql://schichtblitz:${DB_PASSWORD}@db:5432/schichtblitz
+    ports:
+      - "127.0.0.1:3090:3000"
     networks:
       - internal
-      - caddy
 
   db:
     image: postgres:16-alpine
@@ -35,5 +36,3 @@ volumes:
 
 networks:
   internal:
-  caddy:
-    external: true
